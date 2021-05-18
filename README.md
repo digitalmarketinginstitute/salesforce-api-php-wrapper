@@ -1,3 +1,6 @@
+
+**Please note that this repository has now been archived and is no longer supported**
+
 [![Current Version](https://img.shields.io/packagist/v/crunch-accounting/salesforce-api.svg?style=flat-square)](https://packagist.org/packages/crunch-accounting/salesforce-api)
 [![License](https://img.shields.io/packagist/l/crunch-accounting/salesforce-api.svg?style=flat-square)](https://packagist.org/packages/crunch-accounting/salesforce-api)
 [![Scrutinizer](https://img.shields.io/scrutinizer/g/crunch-accounting/salesforce-api-php-wrapper.svg?style=flat-square)](https://scrutinizer-ci.com/g/crunch-accounting/salesforce-api-php-wrapper/)
