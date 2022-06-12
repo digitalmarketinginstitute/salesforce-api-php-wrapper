@@ -1,13 +1,13 @@
 {
-  "name": "crunch-accounting/salesforce-api",
+  "name": "digitalmarketinginstitute/salesforce-api-php-wrapper",
   "description": "A library for interacting with the Salesforce REST API and managing the OAuth flow",
   "keywords": ["salesforce", "rest", "api", "oauth2"],
   "homepage": "https://github.com/crunch-accounting/salesforce-api-php-wrapper",
   "license": "MIT",
   "authors": [
     {
-      "name": "Arthur Guy",
-      "email": "arthur.guy@crunch.co.uk"
+      "name": "Owen Kavanagh",
+      "email": "owen@digitalmarketinginstitute.com"
     }
   ],
   "require": {

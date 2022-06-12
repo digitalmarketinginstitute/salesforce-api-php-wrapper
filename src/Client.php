@@ -1,4 +1,6 @@
-<?php namespace Crunch\Salesforce;
+<?php 
+
+namespace Crunch\Salesforce;
 
 use Crunch\Salesforce\Exceptions\RequestException;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
@@ -74,9 +76,12 @@ class Client
      * @param array  $fields
      * @return string
      */
-    public function getRecord($objectType, $sfId, array $fields)
+    public function getRecord($objectType, $sfId, array $fields = null)
     {
-        $url      = $this->baseUrl . '/services/data/v20.0/sobjects/' . $objectType . '/' . $sfId . '?fields=' . implode(',', $fields);
+        if(is_array($fields)) {
+            $fields = '?fields=' . implode(',', $fields);
+        }
+        $url      = $this->baseUrl . '/services/data/v42.0/sobjects/' . $objectType . '/' . $sfId . $fields;
         $response = $this->makeRequest('get', $url, ['headers' => ['Authorization' => $this->getAuthHeader()]]);
 
         return json_decode($response->getBody(), true);
@@ -96,7 +101,7 @@ class Client
         if ( ! empty($next_url)) {
             $url = $this->baseUrl . '/' . $next_url;
         } else {
-            $url = $this->baseUrl . '/services/data/v24.0/query/?q=' . urlencode($query);
+            $url = $this->baseUrl . '/services/data/v42.0/query/?q=' . urlencode($query);
         }
         $response = $this->makeRequest('get', $url, ['headers' => ['Authorization' => $this->getAuthHeader()]]);
         $data     = json_decode($response->getBody(), true);
@@ -123,7 +128,7 @@ class Client
      */
     public function updateRecord($object, $id, array $data)
     {
-        $url = $this->baseUrl . '/services/data/v20.0/sobjects/' . $object . '/' . $id;
+        $url = $this->baseUrl . '/services/data/v42.0/sobjects/' . $object . '/' . $id;
 
         $this->makeRequest('patch', $url, [
             'headers' => ['Content-Type' => 'application/json', 'Authorization' => $this->getAuthHeader()],
@@ -137,13 +142,13 @@ class Client
      * Create a new object in salesforce
      *
      * @param string $object
-     * @param array|object $data
-     * @return string The id of the newly created record
+     * @param string $data
+     * @return bool
      * @throws \Exception
      */
     public function createRecord($object, $data)
     {
-        $url = $this->baseUrl . '/services/data/v20.0/sobjects/' . $object . '/';
+        $url = $this->baseUrl . '/services/data/v42.0/sobjects/' . $object . '/';
 
         $response     = $this->makeRequest('post', $url, [
             'headers' => ['Content-Type' => 'application/json', 'Authorization' => $this->getAuthHeader()],
@@ -157,18 +162,67 @@ class Client
     /**
      * Delete an object with th specified id
      *
-     * @param string $object
-     * @param string $id
+     * @param $object
+     * @param $id
      * @return bool
      * @throws \Exception
      */
     public function deleteRecord($object, $id)
     {
-        $url = $this->baseUrl . '/services/data/v20.0/sobjects/' . $object . '/' . $id;
+        $url = $this->baseUrl . '/services/data/v42.0/sobjects/' . $object . '/' . $id;
 
         $this->makeRequest('delete', $url, ['headers' => ['Authorization' => $this->getAuthHeader()]]);
 
         return true;
+    }
+
+    /**
+     * Fetch a specific object
+     *
+     * @param string $objectType
+     * @param string $sfId
+     * @param array  $fields
+     * @return string
+     */
+    public function updated($objectType, array $fields)
+    {
+        $url      = $this->baseUrl . '/services/data/v42.0/sobjects/' . $objectType . '/updated/?' . http_build_query($fields);
+        $response = $this->makeRequest('get', $url, ['headers' => ['Authorization' => $this->getAuthHeader()]]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+    /**
+     * Fetch a specific object
+     *
+     * @param string $objectType
+     * @param string $sfId
+     * @param array  $fields
+     * @return string
+     */
+    public function describe($objectType, $id = null)
+    {
+        $url      = $this->baseUrl . '/services/data/v42.0/sobjects/' . $objectType . '/describe/';
+        $response = $this->makeRequest('get', $url, ['headers' => ['Authorization' => $this->getAuthHeader()]]);
+
+        return json_decode($response->getBody(), true);
+    }
+
+
+    /**
+     * Fetch a specific object
+     *
+     * @param string $objectType
+     * @param string $sfId
+     * @param array  $fields
+     * @return string
+     */
+    public function custom($url)
+    {
+        $url      = $this->baseUrl . $url;
+        $response = $this->makeRequest('get', $url, ['headers' => ['Authorization' => $this->getAuthHeader()]]);
+
+        return json_decode($response->getBody(), true);
     }
 
     /**
@@ -265,8 +319,8 @@ class Client
         } catch (GuzzleRequestException $e) {
             
             if ($e->getResponse() === null) {
-        		throw $e;
-        	}
+                throw $e;
+            }
 
             //If its an auth error convert to an auth exception
             if ($e->getResponse()->getStatusCode() == 401) {
@@ -284,9 +338,9 @@ class Client
     private function getAuthHeader()
     {
         if ($this->accessToken === null) {
-    		throw new AuthenticationException(0, "Access token not set");
-    	}
-    	
+            throw new AuthenticationException(0, "Access token not set");
+        }
+        
         return 'Bearer ' . $this->accessToken->getAccessToken();
     }
 
